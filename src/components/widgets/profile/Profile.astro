@@ -122,21 +122,17 @@ import { i18n } from "../../../i18n/translation";
 		return `${profileStatsPageViews} ${pageViews} · ${profileStatsVisits} ${visits}`;
 	}
 
-	async function fetchSiteStats(isRetry = false) {
+	async function fetchSiteStats() {
 		const containers = document.querySelectorAll(".umami-stats-container");
 
-		// oddmisc 未加载则等待重试
-		if (!window.oddmisc) {
-			if (!isRetry) {
-				setTimeout(() => fetchSiteStats(true), 500);
-			} else {
-				containers.forEach((c) => c.classList.add("hidden"));
-			}
-			return;
-		}
-
 		try {
-			const stats = await window.oddmisc.getSiteStats();
+			const response = await fetch("/api/umami-stats.json");
+
+			if (!response.ok) {
+				throw new Error(`Failed to fetch stats: ${response.status}`);
+			}
+
+			const stats = await response.json();
 			const pageViews = stats.pageviews || 0;
 			const visits = stats.visits || 0;
 

@@ -116,16 +116,17 @@ const {
     async function fetchPageViews() {
         const container = document.querySelector('.umami-page-views');
         
-        if (!window.oddmisc) {
-            container?.classList.add('hidden');
-            return;
-        }
-
         const id = container?.dataset.id;
         if (!id) {return;}
 
         try {
-            const stats = await window.oddmisc.getStats(`/posts/${id}/`);
+            const response = await fetch(`/api/umami-stats.json?path=${encodeURIComponent(`/posts/${id}/`)}`);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch stats: ${response.status}`);
+            }
+
+            const stats = await response.json();
             const pageViews = stats.pageviews || 0;
             const visits = stats.visits || 0;
 
