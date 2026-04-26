@@ -125,6 +125,8 @@ const umamiStatsConfig = {
 <script
 	is:inline
 	define:vars={{
+		profileStatsPageViews: i18n(I18nKey.profileStatsPageViews),
+		profileStatsVisits: i18n(I18nKey.profileStatsVisits),
 		profileStatsUnavailable: i18n(I18nKey.profileStatsUnavailable),
 		umamiStatsConfig,
 	}}
@@ -135,7 +137,7 @@ const umamiStatsConfig = {
 	};
 
 	function generateStatsText(pageViews, visits) {
-		return `访问量 ${pageViews} · 访问次数 ${visits}`;
+		return `${profileStatsPageViews} ${pageViews} · ${profileStatsVisits} ${visits}`;
 	}
 
 	function getUmamiStats(options) {

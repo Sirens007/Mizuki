@@ -120,6 +120,8 @@ const umamiStatsConfig = {
 
     {!isHome && id && (
 <script is:inline define:vars={{
+    pageViewsText: i18n(I18nKey.profileStatsPageViews),
+    visitsText: i18n(I18nKey.profileStatsVisits),
     umamiStatsConfig
 }}>
     window.__umamiStatsConfig = {
@@ -128,7 +130,7 @@ const umamiStatsConfig = {
     };
 
     function generateStatsText(pageViews, visits) {
-        return `访问量 ${pageViews} · 访问次数 ${visits}`;
+        return `${pageViewsText} ${pageViews} · ${visitsText} ${visits}`;
     }
 
     function getUmamiStats(options) {
