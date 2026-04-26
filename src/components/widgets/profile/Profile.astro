@@ -6,6 +6,14 @@ import Image from "../../atoms/Image/Image.astro";
 import TypewriterText from "../../atoms/typewriter-text/TypewriterText.astro";
 import I18nKey from "../../../i18n/i18nKey";
 import { i18n } from "../../../i18n/translation";
+
+const umamiStatsConfig = {
+	websiteId: import.meta.env.PUBLIC_UMAMI_WEBSITE_ID,
+	apiEndpoint: import.meta.env.PUBLIC_UMAMI_API_ENDPOINT,
+	baseUrl: import.meta.env.PUBLIC_UMAMI_BASE_URL,
+	apiKey: import.meta.env.PUBLIC_UMAMI_API_KEY,
+	token: import.meta.env.PUBLIC_UMAMI_TOKEN,
+};
 ---
 
 <div class="card-base p-3">
@@ -110,29 +118,52 @@ import { i18n } from "../../../i18n/translation";
 	</div>
 </div>
 
+<script>
+	import "../../../scripts/umami-stats";
+</script>
+
 <script
 	is:inline
 	define:vars={{
-		profileStatsPageViews: i18n(I18nKey.profileStatsPageViews),
-		profileStatsVisits: i18n(I18nKey.profileStatsVisits),
 		profileStatsUnavailable: i18n(I18nKey.profileStatsUnavailable),
+		umamiStatsConfig,
 	}}
 >
+	window.__umamiStatsConfig = {
+		...window.__umamiStatsConfig,
+		...umamiStatsConfig,
+	};
+
 	function generateStatsText(pageViews, visits) {
-		return `${profileStatsPageViews} ${pageViews} · ${profileStatsVisits} ${visits}`;
+		return `访问量 ${pageViews} · 访问次数 ${visits}`;
+	}
+
+	function getUmamiStats(options) {
+		if (window.fetchUmamiStats) {
+			return window.fetchUmamiStats(options);
+		}
+
+		return new Promise((resolve, reject) => {
+			window.addEventListener(
+				"umami-stats-ready",
+				() => {
+					if (!window.fetchUmamiStats) {
+						reject(new Error("Umami stats client did not load"));
+						return;
+					}
+
+					window.fetchUmamiStats(options).then(resolve, reject);
+				},
+				{ once: true },
+			);
+		});
 	}
 
 	async function fetchSiteStats() {
 		const containers = document.querySelectorAll(".umami-stats-container");
 
 		try {
-			const response = await fetch("/api/umami-stats.json");
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch stats: ${response.status}`);
-			}
-
-			const stats = await response.json();
+			const stats = await getUmamiStats();
 			const pageViews = stats.pageviews || 0;
 			const visits = stats.visits || 0;
 
